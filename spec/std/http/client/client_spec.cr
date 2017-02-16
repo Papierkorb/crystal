@@ -7,7 +7,7 @@ private class TestServer < TCPServer
   def self.open(host, port, read_time = 0)
     server = new(host, port)
     begin
-      spawn do
+      response_fiber = spawn do
         io = server.accept
         sleep read_time
         response = HTTP::Client::Response.new(200, headers: HTTP::Headers{"Content-Type" => "text/plain"}, body: "OK")
@@ -15,6 +15,7 @@ private class TestServer < TCPServer
         io.flush
       end
 
+      response_fiber.resume
       yield server
     ensure
       server.close
